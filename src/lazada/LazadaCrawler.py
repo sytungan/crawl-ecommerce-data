@@ -14,12 +14,12 @@ from xlwt.Style import add_palette_colour
 from dotenv import load_dotenv
 import os
 
-f = open("Tiki_Input.txt", 'r')
+f = open("input.txt", 'r')
 
 book = xlwt.Workbook(encoding="utf-8")
 
 load_dotenv()
-chromeDriver = os.getenv("CHROME_DRIVER")
+# chromeDriver = os.getenv("CHROME_DRIVER")
 
 # Setting 
 cService = Service(ChromeDriverManager().install())
@@ -34,8 +34,8 @@ numberUrl = int(f.readline())
 for num in range (numberUrl) :
     f.readline()
     currentSheet = book.add_sheet("Sheet " + str(num))
-    name_file = str(f.readline())
-    currentSheet.write(0, 0, "Tiki")
+    nameFile = str(f.readline())
+    currentSheet.write(0, 0, nameFile)
     currentSheet.write(1, 0, "Name")
     currentSheet.write(1, 1, "Current_Price")
     currentSheet.write(1, 2, "Original_Price")
@@ -165,7 +165,7 @@ for num in range (numberUrl) :
         time.sleep(1)
         # break
 
-book.save("Tiki_Data.xls")
-print("Complete")
+book.save("data.xls")
+print("Completed")
 masterDriver.quit()
 slaveDriver.quit()
