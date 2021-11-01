@@ -1,0 +1,4 @@
+selenium==4.0.0
+xlwt==1.3.0
+python-dotenv==0.19.1
+webdriver-manager==3.5.1
