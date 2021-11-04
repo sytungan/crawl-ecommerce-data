@@ -46,14 +46,15 @@ for num in range (numberUrl) :
     currentSheet.write(1, 7, "Rating_Point")
     currentSheet.write(1, 8, "Rating_Total")
     currentSheet.write(1, 9, "Image_URL")
+    currentSheet.write(1, 10, "Product_URL")
 
     startingUrl = f.readline()
     masterDriver.get(startingUrl)
 
     page = 1; row = 2
     for x in range (200): #maximum page to crawl is 200
-        allProduct = masterDriver.find_elements(By.CLASS_NAME, "product-item")
-
+        time.sleep(2)
+        allProduct = masterDriver.find_elements(By.CLASS_NAME, 'col-xs-2-4.shopee-search-item-result__item')
         print("-----------------------------------------------")
         if not(len(allProduct)):
             print("THE END")
@@ -63,19 +64,19 @@ for num in range (numberUrl) :
 
         for product in allProduct:
             try:
-                productUrl = product.get_attribute('href')
+                productUrl = product.find_element(By.TAG_NAME, 'a').get_attribute('href')
                 slaveDriver.get(productUrl)
                 time.sleep(1)
 
-                productName = slaveDriver.find_element(By.CLASS_NAME, 'title').text
-                time.sleep(1)
+                productName = slaveDriver.find_element(By.CLASS_NAME, 'attM6y').find_element(By.TAG_NAME, 'span').text
+                # print(productName)
                 
 
                 # Price
-                productCurrentPrice = slaveDriver.find_element(By.CLASS_NAME, 'product-price__current-price').text
+                productCurrentPrice = slaveDriver.find_element(By.CLASS_NAME, 'Ybrg9j').text
                 try:
-                    productOriPrice = slaveDriver.find_element(By.CLASS_NAME, 'product-price__list-price').text
-                    productDiscountRate = slaveDriver.find_element(By.CLASS_NAME, 'product-price__discount-rate').text
+                    productOriPrice = slaveDriver.find_element(By.CLASS_NAME, '_2MaBXe').text
+                    productDiscountRate = slaveDriver.find_element(By.CLASS_NAME, '_3LRxdy').text.split(' ')[0]
                 except NoSuchElementException as Exception:
                     productOriPrice = productCurrentPrice
                     productDiscountRate = "0%"
@@ -86,35 +87,34 @@ for num in range (numberUrl) :
                 # print(productCurrentPrice, productOriPrice, productDiscountRate)
 
                 # Description
-                productDescription = slaveDriver.find_elements(By.CLASS_NAME, 'content')
-                slaveDriver.find_element(By.CLASS_NAME, 'btn-more').click()
+                # productDescription = slaveDriver.find_elements(By.CLASS_NAME, '_3wdEZ5')
+                productDescriptionContent = slaveDriver.find_element(By.CLASS_NAME, '_3yZnxJ').text
                 try:
-                    table = productDescription[0].find_elements(By.TAG_NAME, 'td')
+                    table = slaveDriver.find_elements(By.CLASS_NAME, 'aPKXeO')
                     sHeading = ''
                     sContent = ''
                     for idx, val in enumerate(table):
-                        if (idx % 2):
-                            sContent += val.text + '\n'
-                        else:
-                            sHeading += val.text + '\n'
+                        if idx == 0:
+                            continue
+                        sContent += val.find_element(By.CLASS_NAME, 'SFJkS3').text + '\n'
+                        sHeading += val.find_element(By.TAG_NAME, 'div').text + '\n'
                     productDescriptionTableHeading = sHeading
                     productDescriptionTableContent = sContent
-                    if (len(productDescription) > 1):
-                        productDescriptionContent = productDescription[1].text
-                    else:
-                        productDescriptionContent = ""
+
                 except NoSuchElementException as Exception:
                     productDescriptionTableHeading = ''
                     productDescriptionTableContent = ''
-                    productDescriptionContent = productDescription[0].text
 
 
                 # print(productDescriptionContent, productDescriptionTableHeading, productDescriptionTableContent)
-
+                
                 # Rating
                 try:
-                    productRatingPoint = slaveDriver.find_element(By.CLASS_NAME, 'review-rating__point').text
-                    productRatingTotal = slaveDriver.find_element(By.CLASS_NAME, 'review-rating__total').text.split(' ')[0]
+                    productRatingPoint = slaveDriver.find_element(By.CLASS_NAME, 'OitLRu._1mYa1t').text
+                    if (len(slaveDriver.find_elements(By.CLASS_NAME, 'OitLRu')) > 1):
+                        productRatingTotal = slaveDriver.find_elements(By.CLASS_NAME, 'OitLRu')[1].text
+                    else:
+                        productRatingTotal = ""
                 except NoSuchElementException as Exception:
                     productRatingPoint = "" 
                     productRatingTotal = ""
@@ -122,15 +122,22 @@ for num in range (numberUrl) :
                 # print(productRatingPoint, productRatingTotal)
 
                 # Image
-                IMG_SIZE = '500x500'
-                preImgAPI = "https://salt.tikicdn.com/cache/" + IMG_SIZE
                 sImage = ''
-                imageContainer = slaveDriver.find_element(By.CLASS_NAME, 'review-images__list')
-                imageList = imageContainer.find_elements(By.TAG_NAME, 'a')
-                for img in imageList[:-1]:
-                    imgUrl = img.find_element(By.TAG_NAME, 'img').get_attribute('src')
-                    imgUrl = imgUrl.replace('https://salt.tikicdn.com/cache/100x100', preImgAPI)
-                    sImage += imgUrl + '\n'
+                # try:
+                #     imageEle = slaveDriver.find_element(By.CLASS_NAME, '_3Q7kBy._2GchKS')
+                #     slaveDriver.execute_script("arguments[0].click();", imageEle)
+                #     time.sleep(1)
+                #     imageContainer = slaveDriver.find_element(By.CLASS_NAME, 'pWIaLy')
+                #     print(imageContainer.get_attribute('innerHTML'))
+                #     imageList = imageContainer.find_elements(By.TAG_NAME, 'img')
+                #     print(len(imageList))
+                #     for img in imageList[:-1]:
+                #         imgUrl = img.find_element(By.TAG_NAME, 'img').get_attribute('src')
+                #         imgUrl = imgUrl.replace('https://salt.tikicdn.com/cache/100x100', preImgAPI)
+                #         sImage += imgUrl + '\n'
+                # except NoSuchElementException as Exception:
+                #     slaveDriver.find_element(By.CLASS_NAME, '_1T-M8Y._3VLS5X').click()
+
 
                 productImageUrl = sImage 
                 # print(productImageUrl)
@@ -147,6 +154,7 @@ for num in range (numberUrl) :
                 currentSheet.write(row, 7, productRatingPoint)
                 currentSheet.write(row, 8, productRatingTotal)
                 currentSheet.write(row, 9, productImageUrl)
+                currentSheet.write(row, 10, productUrl)
                 row = row + 1
                 # break
 
@@ -159,9 +167,9 @@ for num in range (numberUrl) :
         page = page + 1
         print("Next page")
         if startingUrl.find("hamburger_menu_fly_out_banner") != -1:
-            masterDriver.get(startingUrl + "&page=" + str(page))
+            masterDriver.get(startingUrl + "&page=" + str(page-1))
         else:
-            masterDriver.get(startingUrl + "?page=" + str(page))
+            masterDriver.get(startingUrl + "?page=" + str(page-1))
         time.sleep(1)
         # break
 

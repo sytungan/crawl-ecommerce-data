@@ -46,6 +46,7 @@ for num in range (numberUrl) :
     currentSheet.write(1, 7, "Rating_Point")
     currentSheet.write(1, 8, "Rating_Total")
     currentSheet.write(1, 9, "Image_URL")
+    currentSheet.write(1, 10, "Product_URL")
 
     startingUrl = f.readline()
     masterDriver.get(startingUrl)
@@ -147,6 +148,8 @@ for num in range (numberUrl) :
                 currentSheet.write(row, 7, productRatingPoint)
                 currentSheet.write(row, 8, productRatingTotal)
                 currentSheet.write(row, 9, productImageUrl)
+                currentSheet.write(row, 10, productUrl)
+
                 row = row + 1
                 # break
 
