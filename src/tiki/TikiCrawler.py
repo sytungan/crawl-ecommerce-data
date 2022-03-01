@@ -163,7 +163,7 @@ for num in range (numberUrl) :
 
             page = page + 1
             print("Next page")
-            if startingUrl.find("hamburger_menu_fly_out_banner") != -1:
+            if startingUrl.find("&") != -1:
                 masterDriver.get(startingUrl + "&page=" + str(page))
             else:
                 masterDriver.get(startingUrl + "?page=" + str(page))
