@@ -64,112 +64,114 @@ for num in range (numberUrl) :
         print("Amount: ", len(allProduct))
 
         for product in allProduct:
-            try:
-                productUrlTemp = product.get_attribute('href')
-                productUrl = productUrlTemp.split('?')[0]
-                #productUrl = "https://www.sendo.vn/dong-ho-dinh-vi-tre-em-z6-q19-co-tieng-viet-lap-sim-nghe-goi-doc-lap-41826659.html"
-                #productUrl = "https://www.sendo.vn/dong-ho-cam-ung-dz09-va-z6-38681154.html?source_block_id=listing_products&source_info=desktop2_60___session_key___d9c4a5f0-5516-41c5-ad84-77e2cc899c93_5_algo13_0_14_7_-1&source_page_id=cate2_listing_v2_desc"
-                slaveDriver.get(productUrl)
-                time.sleep(1)
-                print(productUrl)
-                productName = slaveDriver.find_element(By.CLASS_NAME, 'd7e-ed528f.d7e-7dcda3.d7e-f56b44.d7e-fb1c84.undefined').text
-                # Price
-                productCurrentPrice = slaveDriver.find_element(By.CLASS_NAME, 'd7e-87b451.d7e-fb1c84.d7e-a4f628').text
-
-                #print(productUrl)
+            while True:
                 try:
-                    productOriPrice = slaveDriver.find_element(By.CLASS_NAME, 'd7e-d87aa1.d7e-b61d5e.d7e-e3a0b4').text
-                    productDiscountRate = slaveDriver.find_element(By.CLASS_NAME, '_314-fa4b74.d7e-d87aa1.d7e-b61d5e.d7e-a4f628').text
-                except NoSuchElementException as Exception:
-                    productOriPrice = productCurrentPrice
-                    productDiscountRate = "0%"
+                    productUrlTemp = product.get_attribute('href')
+                    productUrl = productUrlTemp.split('?')[0]
+                    #productUrl = "https://www.sendo.vn/dong-ho-dinh-vi-tre-em-z6-q19-co-tieng-viet-lap-sim-nghe-goi-doc-lap-41826659.html"
+                    #productUrl = "https://www.sendo.vn/dong-ho-cam-ung-dz09-va-z6-38681154.html?source_block_id=listing_products&source_info=desktop2_60___session_key___d9c4a5f0-5516-41c5-ad84-77e2cc899c93_5_algo13_0_14_7_-1&source_page_id=cate2_listing_v2_desc"
+                    slaveDriver.get(productUrl)
+                    time.sleep(1)
+                    print(productUrl)
+                    productName = slaveDriver.find_element(By.CLASS_NAME, 'd7e-ed528f.d7e-7dcda3.d7e-f56b44.d7e-fb1c84.undefined').text
+                    # Price
+                    productCurrentPrice = slaveDriver.find_element(By.CLASS_NAME, 'd7e-87b451.d7e-fb1c84.d7e-a4f628').text
+
+                    #print(productUrl)
+                    try:
+                        productOriPrice = slaveDriver.find_element(By.CLASS_NAME, 'd7e-d87aa1.d7e-b61d5e.d7e-e3a0b4').text
+                        productDiscountRate = slaveDriver.find_element(By.CLASS_NAME, '_314-fa4b74.d7e-d87aa1.d7e-b61d5e.d7e-a4f628').text
+                    except NoSuchElementException as Exception:
+                        productOriPrice = productCurrentPrice
+                        productDiscountRate = "0%"
+                    except StaleElementReferenceException as Exception:
+                        productOriPrice = productCurrentPrice
+                        productDiscountRate = "0%"
+                    
+                    # Description
+                    try:
+                        productDescription = slaveDriver.find_elements(By.CLASS_NAME, '_96e-5d268c')[0].text
+                    except NoSuchElementException as Exception:
+                        productDescription = ""
+                    
+                    print(productName)
+
+                    a = slaveDriver.find_elements(By.CLASS_NAME, 'd7e-aa34b6.d7e-1b9468.d7e-13f811.d7e-f99ea6.d7e-dc4b7b')
+                    a[2].click()
+
+                    try:
+                        table = slaveDriver.find_elements(By.CLASS_NAME, 'd7e-ed528f.d7e-fde242.d7e-d87aa1.d7e-b61d5e.d7e-a58302')
+                        sHeading = ''
+                        sContent = ''
+                        for idx, val in enumerate(table):
+                            if (idx % 2):
+                                sContent += val.text + '\n'
+                            else:
+                                sHeading += val.text + '\n'
+                        productDescriptionTableHeading = sHeading
+                        productDescriptionTableContent = sContent
+                    except NoSuchElementException as Exception:
+                        productDescriptionTableHeading = ''
+                        productDescriptionTableContent = ''
+                        #productDescriptionContent = productDescription[0].text
+                    print("table")
+
+
+                    #Rating
+                    try:
+                        productRatingPoint = slaveDriver.find_element(By.CLASS_NAME, 'undefined.d7e-922765.d7e-fb1c84').text
+                        productRatingTotal = slaveDriver.find_element(By.CLASS_NAME, '_39a-b49a28').text.split(' ')[8]
+                    except NoSuchElementException as Exception:
+                        productRatingPoint = "" 
+                        productRatingTotal = ""
+
+                    try:
+                        content = slaveDriver.find_element(By.CLASS_NAME, 'd7e-f7453d.d7e-57f266.undefined.d7e-d87aa1.d7e-b61d5e').text
+                    except NoSuchElementException as Exception:
+                        content = ""
+
+                    if (content != ""):
+                        productDescription = content
+                    print("content")
+
+
+                    # Image
+                    IMG_SIZE = '500x500'
+                    sImage = ''
+                    imageContainer = slaveDriver.find_elements(By.CLASS_NAME, 'swiper-wrapper')[1]
+                    imageList = imageContainer.find_elements(By.TAG_NAME, 'img')
+                    for img in imageList[:-1]:
+                        imgUrl = img.get_attribute('src')
+                        imgUrl = imgUrl.replace('100x100', IMG_SIZE)
+                        sImage += imgUrl + '\n'
+
+                    productImageUrl = sImage 
+                    print("productImageUrl")
+
+                    # Save Data
+                    currentSheet.write(row, 0, productName)
+                    currentSheet.write(row, 1, productCurrentPrice)
+                    currentSheet.write(row, 2, productOriPrice)
+                    currentSheet.write(row, 3, productDiscountRate)
+                    currentSheet.write(row, 4, productDescriptionTableHeading)
+                    currentSheet.write(row, 5, productDescriptionTableContent)
+                    currentSheet.write(row, 6, productDescription)
+                    currentSheet.write(row, 7, productRatingPoint)
+                    currentSheet.write(row, 8, productRatingTotal)
+                    currentSheet.write(row, 9, productImageUrl) 
+                    currentSheet.write(row, 10, productUrl)
+                    row = row + 1
+                    # break
+                    print("done")
+
                 except StaleElementReferenceException as Exception:
-                    productOriPrice = productCurrentPrice
-                    productDiscountRate = "0%"
-                
-                # Description
-                try:
-                    productDescription = slaveDriver.find_elements(By.CLASS_NAME, '_96e-5d268c')[0].text
+                    print("Making except -- Try again")
+                    continue
                 except NoSuchElementException as Exception:
-                    productDescription = ""
-                
-                print(productName)
-
-                a = slaveDriver.find_elements(By.CLASS_NAME, 'd7e-aa34b6.d7e-1b9468.d7e-13f811.d7e-f99ea6.d7e-dc4b7b')
-                a[2].click()
-
-                try:
-                    table = slaveDriver.find_elements(By.CLASS_NAME, 'd7e-ed528f.d7e-fde242.d7e-d87aa1.d7e-b61d5e.d7e-a58302')
-                    sHeading = ''
-                    sContent = ''
-                    for idx, val in enumerate(table):
-                        if (idx % 2):
-                            sContent += val.text + '\n'
-                        else:
-                            sHeading += val.text + '\n'
-                    productDescriptionTableHeading = sHeading
-                    productDescriptionTableContent = sContent
-                except NoSuchElementException as Exception:
-                    productDescriptionTableHeading = ''
-                    productDescriptionTableContent = ''
-                    #productDescriptionContent = productDescription[0].text
-                print("table")
-
-
-                #Rating
-                try:
-                    productRatingPoint = slaveDriver.find_element(By.CLASS_NAME, 'undefined.d7e-922765.d7e-fb1c84').text
-                    productRatingTotal = slaveDriver.find_element(By.CLASS_NAME, '_39a-b49a28').text.split(' ')[8]
-                except NoSuchElementException as Exception:
-                    productRatingPoint = "" 
-                    productRatingTotal = ""
-
-                try:
-                    content = slaveDriver.find_element(By.CLASS_NAME, 'd7e-f7453d.d7e-57f266.undefined.d7e-d87aa1.d7e-b61d5e').text
-                except NoSuchElementException as Exception:
-                    content = ""
-
-                if (content != ""):
-                    productDescription = content
-                print("content")
-
-
-                # Image
-                IMG_SIZE = '500x500'
-                sImage = ''
-                imageContainer = slaveDriver.find_elements(By.CLASS_NAME, 'swiper-wrapper')[1]
-                imageList = imageContainer.find_elements(By.TAG_NAME, 'img')
-                for img in imageList[:-1]:
-                    imgUrl = img.get_attribute('src')
-                    imgUrl = imgUrl.replace('100x100', IMG_SIZE)
-                    sImage += imgUrl + '\n'
-
-                productImageUrl = sImage 
-                print("productImageUrl")
-
-                # Save Data
-                currentSheet.write(row, 0, productName)
-                currentSheet.write(row, 1, productCurrentPrice)
-                currentSheet.write(row, 2, productOriPrice)
-                currentSheet.write(row, 3, productDiscountRate)
-                currentSheet.write(row, 4, productDescriptionTableHeading)
-                currentSheet.write(row, 5, productDescriptionTableContent)
-                currentSheet.write(row, 6, productDescription)
-                currentSheet.write(row, 7, productRatingPoint)
-                currentSheet.write(row, 8, productRatingTotal)
-                currentSheet.write(row, 9, productImageUrl) 
-                currentSheet.write(row, 10, productUrl)
-                row = row + 1
-                # break
-                print("done")
-
-            except StaleElementReferenceException as Exception:
-                print("Making except")
-            except NoSuchElementException as Exception:
-                print("No element")
-            # break
-            except Exception:
-                pass
+                    print("No element")
+                except Exception:
+                    pass
+                break
 
         page = page + 1
         print("Next page")
